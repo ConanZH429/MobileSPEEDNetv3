@@ -1,0 +1,14 @@
+__pycache__/
+result/
+
+test.py
+test.ipynb2
+
+pretrained/
+
+tempCodeRunnerFile.py
+
+*.cpython-310.pyc
+*.pyc
+*.pyo
+*.png
