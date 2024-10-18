@@ -157,7 +157,8 @@ if __name__ == "__main__":
                       plugins=plugins,
                     #   precision=precision,
                       default_root_dir=dirpath,
-                      num_sanity_val_steps=0)
+                      num_sanity_val_steps=0,
+                      gradient_clip_val=2.0)
 
     # ====================模型====================
     # TODO Efficient initialization
