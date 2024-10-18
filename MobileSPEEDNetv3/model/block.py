@@ -253,22 +253,22 @@ class TriFPNAtt(nn.Module):
         self.p52p3_weight = ChannelWeight(in_channels=in_channels[3], out_channels=in_channels[1])
         self.p3_downconv_up = ConvBnAct(in_channels=in_channels[1], out_channels=in_channels[1], kernel_size=3, stride=2, act_layer=nn.Mish)
         # self.p4_fuseconv_up = C2f(fused_channel_p345_up, in_channels[2])
-        self.p4_fuseconv_up = InvertedResidual(fused_channel_p345_up, in_channels[2], exp_ratio=6, act_layer=nn.Mish)
+        self.p4_fuseconv_up = InvertedResidual(fused_channel_p345_up, in_channels[2], exp_ratio=8, act_layer=nn.Mish)
         self.p22p4_weight = SpatialWeight(in_channels=in_channels[0])
         self.p42p2_weight = ChannelWeight(in_channels=in_channels[2], out_channels=in_channels[0])
         self.p2_downconv_up = ConvBnAct(in_channels=in_channels[0], out_channels=in_channels[0], kernel_size=3, stride=2, act_layer=nn.Mish)
         # self.p3_fuseconv_up = C2f(fused_channel_p234_up, in_channels[1])
-        self.p3_fuseconv_up = InvertedResidual(fused_channel_p234_up, in_channels[1], exp_ratio=6, act_layer=nn.Mish)
+        self.p3_fuseconv_up = InvertedResidual(fused_channel_p234_up, in_channels[1], exp_ratio=8, act_layer=nn.Mish)
         
         # 下采样通路
         self.p3_downconv_down = ConvBnAct(in_channels=in_channels[1], out_channels=in_channels[1], kernel_size=3, stride=2, act_layer=nn.Mish)
         
         # self.p4_fuseconv_down = C2f(fused_channel_p34_down, in_channels[2])
-        self.p4_fuseconv_down = InvertedResidual(fused_channel_p34_down, in_channels[2], exp_ratio=6, act_layer=nn.Mish)
+        self.p4_fuseconv_down = InvertedResidual(fused_channel_p34_down, in_channels[2], exp_ratio=8, act_layer=nn.Mish)
         self.p4_downconv_down = ConvBnAct(in_channels=in_channels[2], out_channels=in_channels[2], kernel_size=3, stride=2, act_layer=nn.Mish)
         
         # self.p5_fuseconv_down = C2f(fused_channel_p45_down, in_channels[3])
-        self.p5_fuseconv_down = InvertedResidual(fused_channel_p45_down, in_channels[3], exp_ratio=6, act_layer=nn.Mish)
+        self.p5_fuseconv_down = InvertedResidual(fused_channel_p45_down, in_channels[3], exp_ratio=8, act_layer=nn.Mish)
     
     def forward(self, x):
         p2, p3, p4, p5 = x      # in: 40, 60, 96; p4: 112, 30, 48; p5: 160, 15, 24
@@ -369,12 +369,12 @@ class Head(nn.Module):
             nn.Linear(in_features, in_features),
             nn.Mish(inplace=True),
         )
-        self.weight_fc = nn.Sequential(
-            nn.Linear(in_features, in_features // 4),
-            nn.ReLU(inplace=True),
-            nn.Linear(in_features // 4, in_features),
-            nn.Sigmoid(),
-        )
+        # self.weight_fc = nn.Sequential(
+        #     nn.Linear(in_features, in_features // 4),
+        #     nn.ReLU(inplace=True),
+        #     nn.Linear(in_features // 4, in_features),
+        #     nn.Sigmoid(),
+        # )
         self.pos_hide_features = int(in_features * 0.25)
         self.ori_hide_features = in_features - self.pos_hide_features
         self.pos_fc = nn.Sequential(
@@ -394,7 +394,7 @@ class Head(nn.Module):
         )
     
     def forward(self, x):
-        x = self.fc(x) * self.weight_fc(x)
+        x = self.fc(x)
         pos_feature, ori_feature = torch.split(x, [self.pos_hide_features, self.ori_hide_features], dim=1)
         # pos_feature = x[:, :self.pos_hide_features]
         # ori_feature = x
