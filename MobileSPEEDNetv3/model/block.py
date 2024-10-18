@@ -210,7 +210,7 @@ class ChannelWeight(nn.Module):
         self.out_channels = out_channels
         self.fc = nn.Sequential(
             nn.Linear(in_channels, in_channels // reduction),
-            nn.ReLU(inplace=True),
+            nn.Mish(inplace=True),
             nn.Linear(in_channels // reduction, out_channels),
         )
     
@@ -218,7 +218,7 @@ class ChannelWeight(nn.Module):
         b, c, _, _ = x.size()
         y_avg = self.AvgPool(x).view(b, c)
         y_max = self.MaxPoll(x).view(b, c)
-        weight = F.sigmoid(self.fc(0.5*y_avg+0.5*y_max)).view(b, self.out_channels, 1, 1)
+        weight = F.sigmoid(self.fc(y_avg+y_max)).view(b, self.out_channels, 1, 1)
         return weight
 
 
