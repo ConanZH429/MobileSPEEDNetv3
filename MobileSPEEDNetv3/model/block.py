@@ -367,7 +367,7 @@ class Head(nn.Module):
         
         self.fc = nn.Sequential(
             nn.Linear(in_features, in_features),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
         )
         # self.weight_fc = nn.Sequential(
         #     nn.Linear(in_features, in_features // 4),
@@ -375,7 +375,7 @@ class Head(nn.Module):
         #     nn.Linear(in_features // 4, in_features),
         #     nn.Sigmoid(),
         # )
-        self.pos_hide_features = int(in_features * 0.25)
+        self.pos_hide_features = int(in_features * 0.2)
         self.ori_hide_features = in_features - self.pos_hide_features
         self.pos_fc = nn.Sequential(
             nn.Linear(self.pos_hide_features, pos_dim),

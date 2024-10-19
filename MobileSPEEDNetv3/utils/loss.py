@@ -30,16 +30,16 @@ def Log_Cosh_Loss(pre: Tensor, label: Tensor):
 # 分类损失函数
 @torch.jit.script
 def CrossEntropy_Loss(pre: Tensor, label: Tensor):
-    return torch.mean(torch.sum(-label * torch.log(pre + 1e-12), dim=1))
+    return torch.mean(torch.sum(-label * torch.log(pre + 1e-6), dim=1))
 
 @torch.jit.script
 def JS_Divergence(pre: Tensor, label: Tensor):
     m = 0.5 * (pre + label)
-    return torch.mean(0.5 * (entropy(pre, m, eps2=1e-12) + entropy(label, m, eps1=1e-12)))
+    return torch.mean(0.5 * (entropy(pre, m, eps2=1e-6) + entropy(label, m, eps1=1e-6)))
 
 @torch.jit.script
 def KL_Divergence(pre: Tensor, label: Tensor):
-    return torch.mean(entropy(pre, label, eps2=1e-12))
+    return torch.mean(entropy(pre, label, eps2=1e-6))
 
 @torch.jit.script
 def Focal_Loss(pre: Tensor, label: Tensor, gamma: float = 2.0, alpha: float = 0.25):
@@ -50,7 +50,7 @@ def Focal_Loss(pre: Tensor, label: Tensor, gamma: float = 2.0, alpha: float = 0.
 
 @torch.compile
 def Arccos_Loss(pre: Tensor, label: Tensor):
-    return torch.mean(2 * torch.arccos(torch.abs(torch.sum(pre * label, dim=1))))
+    return torch.mean(2 * torch.arccos(torch.clip(torch.abs(torch.sum(pre * label, dim=1)), -1, 1)))
 
 def get_reg_loss(loss_type: str, **kwargs):
     if loss_type not in ["MAE", "MSE", "Huber", "Log_Cosh"]:

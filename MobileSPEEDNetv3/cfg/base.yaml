@@ -1,6 +1,6 @@
 # =================global configuration====================
 name: euler-encode
-seed: 11
+seed: 13
 split: [0.85, 0.15]     # train val
 bar: rich               # 进度条 rich/tqdm
 accelerator: gpu        # 训练设备 cpu/gpu
@@ -19,7 +19,7 @@ self_supervised: false
 
 # =========================dataset=========================
 data_dir: ../datasets/speed     # 数据路径
-workers: 10            # dataloader workers
+workers: 16            # dataloader workers
 ram: false            # 是否使用内存加载数据
 imgsz: [480, 768]     # 图片大小 [480, 768]
 resize_first: false    # 是否先resize
@@ -71,7 +71,7 @@ milestones: [30, 60]  # 学习率衰减里程碑
 
 # ==========================Augmentation===================
 Augmentation:
-  p: 0.1
+  p: 0.01
 
 Rotate:
   p: 0.8             # p为图片旋转的概率，(1-p)为相机旋转的概率

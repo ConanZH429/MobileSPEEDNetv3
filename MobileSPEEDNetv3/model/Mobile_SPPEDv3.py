@@ -14,7 +14,7 @@ class Mobile_SPEEDv3(nn.Module):
     def __init__(self, config: dict):
         super(Mobile_SPEEDv3, self).__init__()
         
-        self.expand2rgb_conv = Conv2dNormActivation(1, 3, kernel_size=3, stride=1, padding=1, activation_layer=nn.Mish, bias=True)
+        self.expand2rgb_conv = Conv2dNormActivation(1, 3, kernel_size=3, stride=1, padding=1, activation_layer=nn.Mish, bias=False)
         
         if config["backbone"] == "mobilenet_v3_large":
             if config["pretrained"]:
