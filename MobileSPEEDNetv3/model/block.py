@@ -209,16 +209,16 @@ class ChannelWeight(nn.Module):
         self.MaxPoll = nn.AdaptiveAvgPool2d(1)
         self.out_channels = out_channels
         self.fc = nn.Sequential(
-            nn.Linear(in_channels, in_channels // reduction),
+            nn.Linear(in_channels*2, in_channels*2 // reduction),
             nn.Mish(inplace=True),
-            nn.Linear(in_channels // reduction, out_channels),
+            nn.Linear(in_channels*2 // reduction, out_channels),
         )
     
     def forward(self, x):
         b, c, _, _ = x.size()
         y_avg = self.AvgPool(x).view(b, c)
         y_max = self.MaxPoll(x).view(b, c)
-        weight = F.sigmoid(self.fc(y_avg+y_max)).view(b, self.out_channels, 1, 1)
+        weight = F.sigmoid(self.fc(torch.cat([y_avg, y_max], dim=1))).view(b, self.out_channels, 1, 1)
         return weight
 
 
@@ -399,7 +399,6 @@ class Head(nn.Module):
         # pos_feature = x[:, :self.pos_hide_features]
         # ori_feature = x
         pos = self.pos_fc(pos_feature)
-        ori_feature = ori_feature
         yaw = self.yaw_fc(ori_feature)
         pitch = self.pitch_fc(ori_feature)
         roll = self.roll_fc(ori_feature)
