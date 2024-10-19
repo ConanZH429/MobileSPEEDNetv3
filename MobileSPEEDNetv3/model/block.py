@@ -210,7 +210,7 @@ class ChannelWeight(nn.Module):
         self.out_channels = out_channels
         self.fc = nn.Sequential(
             nn.Linear(in_channels*2, in_channels*2 // reduction),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Linear(in_channels*2 // reduction, out_channels),
         )
     
