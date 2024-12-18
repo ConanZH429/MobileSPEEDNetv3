@@ -209,16 +209,16 @@ class ChannelWeight(nn.Module):
         self.MaxPoll = nn.AdaptiveAvgPool2d(1)
         self.out_channels = out_channels
         self.fc = nn.Sequential(
-            nn.Linear(in_channels*2, in_channels*2 // reduction),
+            nn.Linear(in_channels, in_channels // reduction),
             nn.ReLU(inplace=True),
-            nn.Linear(in_channels*2 // reduction, out_channels),
+            nn.Linear(in_channels // reduction, out_channels),
         )
     
     def forward(self, x):
         b, c, _, _ = x.size()
         y_avg = self.AvgPool(x).view(b, c)
         y_max = self.MaxPoll(x).view(b, c)
-        weight = F.sigmoid(self.fc(torch.cat([y_avg, y_max], dim=1))).view(b, self.out_channels, 1, 1)
+        weight = F.sigmoid(self.fc(y_avg + y_max)).view(b, self.out_channels, 1, 1)
         return weight
 
 
