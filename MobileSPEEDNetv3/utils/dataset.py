@@ -10,11 +10,65 @@ import albumentations as A
 import cv2 as cv
 import lightning as L
 import numpy as np
+import random
 
 import json
 import torch
 from torch.utils.data import DataLoader
 
+def add_sun_flare(image, bbox):
+    x_min, y_min, x_max, y_max = bbox
+    # 随机生成一个光晕中心, 使其不在bbox内
+    # t = 0
+    # while True:
+    #     t += 1
+    #     flare_center = (
+    #         random.randint(0, image.shape[1] - 1),
+    #         random.randint(0, image.shape[0] - 1)
+    #     )
+    #     if not (x_min <= flare_center[0] <= x_max and y_min <= flare_center[1] <= y_max):
+    #         break
+    #     if t > 10:
+    #         flare_center = (
+    #             random.randint(0, image.shape[1] - 1),
+    #             random.randint(0, image.shape[0] - 1)
+    #         )
+    #         break
+    flare_center = (
+        random.randint(0, image.shape[1] - 1),
+        random.randint(0, image.shape[0] - 1)
+    )
+    # 随机生成光晕半径
+    src_radius = random.randint(300, 700)
+    # 随机生成光晕颜色
+    src_color = (
+        random.randint(240, 255),
+        random.randint(240, 255),
+        random.randint(240, 255)
+    )
+    # 随机生成光晕强度
+    circles = [(0.1, flare_center, src_radius // 10, src_color)]
+    # for i in range(random.randint(1, 5)):
+    #     circles.append(
+    #         (
+    #             np.clip(circles[-1][0] + random.uniform(0.1, 0.3), 0.1, 1.0),
+    #             (
+    #                 np.clip(circles[-1][1][0] + random.randint(-10, 10), 0, image.shape[1] - 1),
+    #                 np.clip(circles[-1][1][1] + random.randint(-10, 10), 0, image.shape[0] - 1)
+    #             ),
+    #             np.clip(circles[-1][2] - random.randint(5, 10), 0, src_radius // 10),
+    #             (
+    #                 random.randint(240, 255),
+    #                 random.randint(240, 255),
+    #                 random.randint(240, 255)
+    #             )
+    #         )
+    #     )
+    image_sun_flare = A.functional.add_sun_flare_physics_based(
+        image, flare_center, src_radius, src_color, circles
+    )
+    # 转为灰度图
+    return image_sun_flare
 
 def CropAndPad(img: np.array, bbox: List[float]):
     # 对图片进行裁剪
@@ -342,7 +396,7 @@ class Speed(Dataset):
         
         # Resize到设定大小
         if Speed.config["resize_first"]:
-            transformed = self.Resize(image=image, bboxes=[bbox], category_ids=[1], interpolation=cv.INTER_LINEAR)
+            transformed = self.Resize(image=image, bboxes=[bbox], category_ids=[1])
             image = transformed["image"]
             bbox = list(map(int, list(transformed["bboxes"][0])))
         
@@ -409,9 +463,16 @@ class Speed(Dataset):
             image_2 = self.transform(image_2)       # (1, 480, 768)
             return image_1, image_2
         
+        if "val" in self.mode:
+            # sun_flare_folder = Path("/home/zh/pythonhub/yaolu/datasets/speed/images/sun_flare")
+            image = cv.cvtColor(image, cv.COLOR_GRAY2BGR)
+            image = add_sun_flare(image, bbox)
+            image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+            # cv.imwrite(str(sun_flare_folder / filename), image)
+        
         # 使用torchvision转换图片
         if not Speed.config["resize_first"]:
-            transformed = self.Resize(image=image, bboxes=[bbox], category_ids=[1], interpolation=cv.INTER_LINEAR)
+            transformed = self.Resize(image=image, bboxes=[bbox], category_ids=[1])
             image = transformed["image"]
             bbox = list(map(int, list(transformed["bboxes"][0])))
         
@@ -469,7 +530,7 @@ class SpeedDataModule(L.LightningDataModule):
             self.speed_data_val: Speed = Speed("val")
     
     def train_dataloader(self) -> MultiEpochsDataLoader:
-        loader = MultiEpochsDataLoader(
+        loader = DataLoader(
             self.speed_data_train,
             batch_size=self.config["batch_size"],
             shuffle=True,
@@ -481,7 +542,7 @@ class SpeedDataModule(L.LightningDataModule):
         return loader
     
     def val_dataloader(self) -> MultiEpochsDataLoader:
-        loader = MultiEpochsDataLoader(
+        loader = DataLoader(
             self.speed_data_val,
             batch_size=self.config["batch_size"],
             shuffle=False,
