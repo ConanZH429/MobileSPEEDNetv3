@@ -463,12 +463,18 @@ class Speed(Dataset):
             image_2 = self.transform(image_2)       # (1, 480, 768)
             return image_1, image_2
         
-        if "val" in self.mode:
-            # sun_flare_folder = Path("/home/zh/pythonhub/yaolu/datasets/speed/images/sun_flare")
+        if "train" in self.mode:
+            if random.random() < 0.5:
+                # sun_flare_folder = Path("/home/zh/pythonhub/yaolu/datasets/speed/images/sun_flare")
+                image = cv.cvtColor(image, cv.COLOR_GRAY2BGR)
+                image = add_sun_flare(image, bbox)
+                image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+                # cv.imwrite(str(sun_flare_folder / filename), image)
+        else:
             image = cv.cvtColor(image, cv.COLOR_GRAY2BGR)
             image = add_sun_flare(image, bbox)
             image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-            # cv.imwrite(str(sun_flare_folder / filename), image)
+            
         
         # 使用torchvision转换图片
         if not Speed.config["resize_first"]:
