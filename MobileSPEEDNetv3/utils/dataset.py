@@ -187,7 +187,7 @@ def prepare_Speed(config: dict):
             "transform": v2.Compose([
                 v2.ToImage(), v2.ToDtype(torch.float32, scale=True),
             ]),
-            "A_transform": None,
+            "A_transform": None
         },
         "self_supervised_train": {
             "transform": v2.Compose([
@@ -341,6 +341,13 @@ class Speed(Dataset):
         p=1,
         bbox_params=A.BboxParams(format="pascal_voc", label_fields=["category_ids"]))
         self.last_resize = v2.Resize(Speed.config["imgsz"])
+        self.sun_flare = A.RandomSunFlare(
+            flare_roi=(0, 0, 1, 1),
+            num_flare_circles_range=(5, 10),
+            src_radius=500,
+            method="overlay",
+            p=0.5
+        )
         
     
     def __len__(self):
@@ -393,6 +400,8 @@ class Speed(Dataset):
                 dice = np.random.rand()
                 if dice < Speed.config["DropBlockSafe"]["p"]:
                     image = DropBlockSafe(image, bbox, Speed.config["DropBlockSafe"]["drop_num"])
+        
+        image = self.sun_flare(image=image)["image"]
         
         # Resize到设定大小
         if Speed.config["resize_first"]:
@@ -463,17 +472,17 @@ class Speed(Dataset):
             image_2 = self.transform(image_2)       # (1, 480, 768)
             return image_1, image_2
         
-        if "train" in self.mode:
-            if random.random() < 0.5:
-                # sun_flare_folder = Path("/home/zh/pythonhub/yaolu/datasets/speed/images/sun_flare")
-                image = cv.cvtColor(image, cv.COLOR_GRAY2BGR)
-                image = add_sun_flare(image, bbox)
-                image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-                # cv.imwrite(str(sun_flare_folder / filename), image)
-        else:
-            image = cv.cvtColor(image, cv.COLOR_GRAY2BGR)
-            image = add_sun_flare(image, bbox)
-            image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+        # if "train" in self.mode:
+        #     if random.random() < 0.5:
+        #         # sun_flare_folder = Path("/home/zh/pythonhub/yaolu/datasets/speed/images/sun_flare")
+        #         image = cv.cvtColor(image, cv.COLOR_GRAY2BGR)
+        #         image = add_sun_flare(image, bbox)
+        #         image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+        #         # cv.imwrite(str(sun_flare_folder / filename), image)
+        # else:
+        #     image = cv.cvtColor(image, cv.COLOR_GRAY2BGR)
+        #     image = add_sun_flare(image, bbox)
+        #     image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
             
         
         # 使用torchvision转换图片
