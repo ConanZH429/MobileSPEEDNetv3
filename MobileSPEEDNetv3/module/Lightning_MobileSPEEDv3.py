@@ -55,8 +55,7 @@ class LightningMobileSPEEDv3(L.LightningModule):
                     "pos_label_1", "pos_label_2", "pos_label_3",
                     "ori_label_1", "ori_label_2", "ori_label_3", "ori_label_4",
                     "pos_pred_1", "pos_pred_2", "pos_pred_3",
-                    "ori_pred_1", "ori_pred_2", "ori_pred_3", "ori_pred_4",
-                    "pos_error(m)", "ori_error(deg)"]]
+                    "ori_pred_1", "ori_pred_2", "ori_pred_3", "ori_pred_4"]]
         # self.model = torch.compile(self.model)
 
 
@@ -169,20 +168,18 @@ class LightningMobileSPEEDv3(L.LightningModule):
         
         
         if self.config["save_csv"]:
-            new_result = [labels["filename"][0],
-                        labels["pos"][0][0].item(), labels["pos"][0][1].item(), labels["pos"][0][2].item(),
-                        labels["ori"][0][0].item(), labels["ori"][0][1].item(), labels["ori"][0][2].item(), labels["ori"][0][3].item(),
-                        pos[0][0].item(), pos[0][1].item(), pos[0][2].item(),
-                        ori_decode[0][0].item(), ori_decode[0][1].item(), ori_decode[0][2].item(), ori_decode[0][3].item(),
-                        self.pos_error.compute().item(), self.ori_error.compute().item()]
-            self.result.append(new_result)
-            self.pos_error.reset()
-            self.ori_error.reset()
+            for i in range(num):
+                new_result = [labels["filename"][i],
+                            labels["pos"][i][0].item(), labels["pos"][i][1].item(), labels["pos"][i][2].item(),
+                            labels["ori"][i][0].item(), labels["ori"][i][1].item(), labels["ori"][i][2].item(), labels["ori"][i][3].item(),
+                            pos[i][0].item(), pos[i][1].item(), pos[i][2].item(),
+                            ori_decode[i][0].item(), ori_decode[i][1].item(), ori_decode[i][2].item(), ori_decode[i][3].item()]
+                self.result.append(new_result)
 
 
     def on_validation_epoch_end(self) -> None:
         if self.config["save_csv"]:
-            with open("result.csv", "w", encoding="utf-8") as csv_file:
+            with open("result_sun_flare.csv", "w", encoding="utf-8") as csv_file:
                 csv_writer = csv.writer(csv_file)
                 csv_writer.writerows(self.result)
         self.score.update(self.ori_error.compute(), self.pos_error.compute())

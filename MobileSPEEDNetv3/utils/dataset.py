@@ -194,7 +194,6 @@ def prepare_Speed(config: dict):
                 v2.ToImage(), v2.ToDtype(torch.float32, scale=True),
             ]),
             "A_transform": [A.Compose([
-                A.Flip(p=0.5),
                 A.Affine(translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
                          p=1),
                 A.SafeRotate(limit=180, p=1.0),
@@ -231,7 +230,6 @@ def prepare_Speed(config: dict):
                 v2.ToImage(), v2.ToDtype(torch.float32, scale=True),
             ]),
             "A_transform": [A.Compose([
-                A.Flip(p=0.5),
                 A.Affine(translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
                          p=1),
                 A.SafeRotate(limit=180, p=1.0),
@@ -402,6 +400,7 @@ class Speed(Dataset):
                     image = DropBlockSafe(image, bbox, Speed.config["DropBlockSafe"]["drop_num"])
         
         image = self.sun_flare(image=image)["image"]
+        cv.imwrite(f"/home/zh/pythonhub/yaolu/datasets/speed/images/sun_flare/{filename}", image)
         
         # Resize到设定大小
         if Speed.config["resize_first"]:

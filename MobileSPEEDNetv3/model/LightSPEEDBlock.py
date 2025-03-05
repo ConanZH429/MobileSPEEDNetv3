@@ -5,8 +5,6 @@ import torch.nn.functional as F
 from torch import nn
 
 from timm.layers.conv_bn_act import ConvBnAct
-
-from fightingcv_attention.rep.repvgg import RepBlock
 # =======================block=========================
 
 class DownSample3x3(nn.Module):

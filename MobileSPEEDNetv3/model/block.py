@@ -12,7 +12,6 @@ from .LightSPEEDBlock import C2f
 
 from timm.layers.conv_bn_act import ConvBnAct
 from timm.models._efficientnet_blocks import InvertedResidual
-from fightingcv_attention.attention import SEAttention
 
 def autopad(k, p=None, d=1):  # kernel, padding, dilation
     """Pad to 'same' shape outputs."""

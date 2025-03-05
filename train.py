@@ -174,5 +174,5 @@ if __name__ == "__main__":
 
     # ====================验证====================
     if config["val"]:
-        module = LightningMobileSPEEDv3.load_from_checkpoint("/home/zh/pythonhub/yaolu/MobileSPEEDNetv3/result/epoch=254-best-95699.ckpt", config=config)
+        module = LightningMobileSPEEDv3.load_from_checkpoint("/home/zh/pythonhub/yaolu/MobileSPEEDNetv3/result/epoch=276-best-63899.ckpt", config=config)
         trainer.validate(model=module, datamodule=dataloader)
